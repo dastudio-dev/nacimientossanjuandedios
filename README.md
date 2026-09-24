@@ -7,7 +7,7 @@ Web de una sola página (`index.html`) con Tailwind, Chart.js y Firebase (Auth +
 [auditorianacimientos](https://github.com/diegoastein/auditorianacimientos) (consultas, exportación y dashboard).
 
 - **Ingreso**: alta de pacientes (datos del paciente, maternos, grupo/Rh, PCD/PCI, antecedentes, parto, RN, diagnóstico, notas).
-- **Consultas & Reportes**: filtros avanzados, edición de pacientes y exportación a CSV (compatible con Excel en español).
+- **Consultas & Reportes**: filtros avanzados, edición y borrado de pacientes, y exportación a CSV (compatible con Excel en español).
 - **Dashboard Estadístico**: KPIs y gráficos por año / mes.
 
 ## Puesta en marcha de Firebase (una sola vez)
@@ -30,4 +30,8 @@ El registro es abierto, pero para ver o cargar pacientes una cuenta tiene que:
    (sugerido: `nombre`, `rol`).
 
 Para quitar el acceso a alguien, borrar su documento de `autorizados`.
-Desde la app no se pueden borrar pacientes (las reglas lo impiden).
+## Pacientes borrados
+
+Al borrar un paciente desde la app se guarda una copia completa en la colección `logs_borrado`
+(con `deletedBy` y `deletedAt`). Para recuperarlo, copiar los campos de `paciente` a un documento
+nuevo en `pacientes` desde la consola de Firebase.

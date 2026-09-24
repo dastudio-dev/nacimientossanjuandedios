@@ -75,6 +75,11 @@
             border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; transition: background-color 0.3s;
         }
         .btn-edit:hover { background-color: #0090c7; }
+        .btn-danger {
+            background-color: #dc2626; color: white; padding: 0.3rem 0.75rem;
+            border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; transition: background-color 0.3s;
+        }
+        .btn-danger:hover { background-color: #b91c1c; }
 
         .link { color: var(--sjd-azul); font-weight: 600; }
         .link:hover { color: var(--sjd-celeste); }
@@ -457,7 +462,7 @@
             signOut, sendEmailVerification, sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import {
-            getFirestore, collection, addDoc, onSnapshot, doc, getDoc, updateDoc, serverTimestamp
+            getFirestore, collection, addDoc, onSnapshot, doc, getDoc, updateDoc, writeBatch, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // ------------------------------------------------------------------
@@ -993,15 +998,44 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${edit}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                             <button class="btn-edit" data-edit="${escapeHtml(p.id)}">Editar</button>
+                            <button class="btn-danger ml-1" data-delete="${escapeHtml(p.id)}">Borrar</button>
                         </td>
                     </tr>`;
             }).join('');
         }
 
         $('pacientes-tbody').addEventListener('click', (e) => {
-            const btn = e.target.closest('[data-edit]');
-            if (btn) openEditModal(btn.dataset.edit);
+            const editBtn = e.target.closest('[data-edit]');
+            if (editBtn) return openEditModal(editBtn.dataset.edit);
+            const deleteBtn = e.target.closest('[data-delete]');
+            if (deleteBtn) deletePatient(deleteBtn.dataset.delete);
         });
+
+        // ------------------------------------------------------------------
+        // BORRADO (con copia de respaldo en "logs_borrado")
+        // ------------------------------------------------------------------
+        async function deletePatient(id) {
+            const p = allPatients.find(x => x.id === id);
+            if (!p) return showToast('Paciente no encontrado', 'error');
+            const nombre = `${p.apellido || ''}, ${p.nombre || ''}`;
+            if (!confirm(`¿Borrar a ${nombre} (nacido el ${formatDate(p.fecha_nacimiento)})?\n\nEsta acción no se puede deshacer desde la app.`)) return;
+            try {
+                const { id: _id, ...data } = p;
+                const batch = writeBatch(db);
+                batch.set(doc(collection(db, 'logs_borrado')), {
+                    pacienteId: id,
+                    paciente: data,
+                    deletedBy: auth.currentUser.email,
+                    deletedAt: serverTimestamp()
+                });
+                batch.delete(doc(db, 'pacientes', id));
+                await batch.commit();
+                showToast('Paciente borrado', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Error al borrar', 'error');
+            }
+        }
 
         // ------------------------------------------------------------------
         // EDICIÓN

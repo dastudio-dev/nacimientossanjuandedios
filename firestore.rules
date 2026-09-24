@@ -14,7 +14,14 @@ service cloud.firestore {
 
     match /pacientes/{pacienteId} {
       allow read, create, update: if autorizado();
-      allow delete: if false; // los registros no se borran desde la app
+      allow delete: if autorizado();
+    }
+
+    // Copia de respaldo de cada paciente borrado (quién y cuándo).
+    // Desde la app solo se puede agregar; se consulta y restaura desde la consola.
+    match /logs_borrado/{logId} {
+      allow create: if autorizado() && request.resource.data.deletedBy == request.auth.token.email;
+      allow read, update, delete: if false;
     }
 
     // Cada usuario solo puede consultar si su propio email está autorizado.
