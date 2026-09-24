@@ -20,6 +20,9 @@ Web de una sola página (`index.html`) con Tailwind, Chart.js y Firebase (Auth +
 6. **Configuración del proyecto** (⚙️) → Tus apps → ícono Web `</>` → registrar la app → copiar el objeto
    `firebaseConfig` y pegarlo en `index.html` (buscar `COMPLETAR`).
 
+> Ya configurado en el proyecto `nacimientossanjuandedios`. Si se cambian las reglas o el proveedor de login,
+> se publican con la CLI: `firebase deploy --only firestore:rules,auth`.
+
 ## Usuarios autorizados
 
 El registro es abierto, pero para ver o cargar pacientes una cuenta tiene que:
