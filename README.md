@@ -6,8 +6,8 @@ Web de una sola página (`index.html`) con Tailwind, Chart.js y Firebase (Auth +
 [nacimientos2](https://github.com/diegoastein/nacimientos2) (formulario de ingreso y edición) y
 [auditorianacimientos](https://github.com/diegoastein/auditorianacimientos) (consultas, exportación y dashboard).
 
-- **Ingreso**: alta de pacientes (datos del paciente, maternos, grupo/Rh, PCD/PCI, antecedentes, parto, RN, diagnóstico, notas).
-- **Consultas & Reportes**: filtros avanzados, edición y borrado de pacientes, y exportación a CSV (compatible con Excel en español).
+- **Ingreso**: alta de pacientes (datos del paciente, maternos, antecedentes, parto, recién nacido con RCP, diagnóstico, notas).
+- **Consultas & Reportes**: filtros avanzados, edición y borrado de pacientes, y exportación a Excel (.xlsx).
 - **Dashboard Estadístico**: KPIs y gráficos por año / mes.
 
 ## Puesta en marcha de Firebase (una sola vez)

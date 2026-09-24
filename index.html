@@ -294,10 +294,6 @@
                                 <div><label class="block text-gray-700 font-medium text-xs">Edad mat. mín.</label><input type="number" id="filter-edad-materna-desde" class="form-input" min="10"></div>
                                 <div><label class="block text-gray-700 font-medium text-xs">Edad mat. máx.</label><input type="number" id="filter-edad-materna-hasta" class="form-input" min="10"></div>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><label class="block text-gray-700 font-medium text-xs">Controles mín.</label><input type="number" id="filter-controles-desde" class="form-input" min="0"></div>
-                                <div><label class="block text-gray-700 font-medium text-xs">Controles máx.</label><input type="number" id="filter-controles-hasta" class="form-input" min="0"></div>
-                            </div>
                         </div>
 
                         <div class="space-y-3">
@@ -309,7 +305,7 @@
                         </div>
 
                         <div class="space-y-3">
-                            <h3 class="filter-section-title">Medidas &amp; Apgar</h3>
+                            <h3 class="filter-section-title">Medidas, Apgar &amp; RCP</h3>
                             <div class="grid grid-cols-2 gap-2">
                                 <div><label class="block text-gray-700 font-medium text-xs">Peso mín. (gr)</label><input type="number" id="filter-peso-desde" class="form-input" min="0"></div>
                                 <div><label class="block text-gray-700 font-medium text-xs">Peso máx. (gr)</label><input type="number" id="filter-peso-hasta" class="form-input" min="0"></div>
@@ -321,6 +317,10 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <div><label class="block text-gray-700 font-medium text-xs">Apgar 1 mín.</label><input type="number" id="filter-apgar1-desde" class="form-input" min="0" max="10"></div>
                                 <div><label class="block text-gray-700 font-medium text-xs">Apgar 1 máx.</label><input type="number" id="filter-apgar1-hasta" class="form-input" min="0" max="10"></div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium">Requirió RCP</label>
+                                <select id="filter-rcp" class="form-input"><option value="">Cualquiera</option><option value="si">Sí</option><option value="no">No</option></select>
                             </div>
                         </div>
 
@@ -479,15 +479,10 @@
         };
 
         // ------------------------------------------------------------------
-        // CATÁLOGOS (única fuente para formulario, filtros, tabla, CSV y gráficos)
+        // CATÁLOGOS (única fuente para formulario, filtros, tabla, Excel y gráficos)
         // ------------------------------------------------------------------
-        const GRUPOS = [['A', 'A'], ['B', 'B'], ['AB', 'AB'], ['0', '0']];
-        const RH = [['+', '+'], ['-', '-']];
-        const PCD_PCI = [['negativo', 'Negativo'], ['positivo', 'Positivo']];
         const TIPO_NACIMIENTO = [['parto', 'Parto'], ['cesarea', 'Cesárea']];
         const PRESENTACION = [['cefalica', 'Cefálica'], ['transversa', 'Transversa'], ['podalica', 'Podálica']];
-        const MEMBRANAS = [['rotura_espontanea', 'Rotura espontánea'], ['rotura_artificial', 'Rotura artificial'], ['rotura_prematura', 'Rotura prematura']];
-        const LIQUIDO = [['claro', 'Claro'], ['meconial', 'Meconial'], ['sanguinolento', 'Sanguinolento']];
         const EVOLUCION = [['internacion_conjunta', 'Internación conjunta'], ['utin', 'UTIN'], ['obito', 'Óbito']];
         const ANT_PATOLOGICOS = [
             ['ninguno', 'Ninguno'], ['hta', 'HTA'], ['dbt', 'DBT'], ['dbt_gestacional', 'DBT gestacional'],
@@ -503,18 +498,17 @@
         ];
 
         const LABELS = Object.fromEntries(
-            [TIPO_NACIMIENTO, PRESENTACION, MEMBRANAS, LIQUIDO, EVOLUCION, PCD_PCI, ANT_PATOLOGICOS, DIAGNOSTICOS].flat()
+            [TIPO_NACIMIENTO, PRESENTACION, EVOLUCION, ANT_PATOLOGICOS, DIAGNOSTICOS].flat()
         );
         const label = (v) => (v === null || v === undefined || v === '') ? '' : (LABELS[v] ?? String(v));
         const labelList = (arr) => (Array.isArray(arr) ? arr : []).map(label).join(', ');
 
         const TEXT_FIELDS = [
             'apellido', 'nombre', 'fecha_nacimiento', 'hora_nacimiento',
-            'grupo_materno', 'rh_materno', 'grupo_paciente', 'rh_paciente', 'pcd', 'pci',
-            'tipo_nacimiento', 'presentacion', 'membranas', 'liquido_amniotico', 'evolucion',
+            'tipo_nacimiento', 'presentacion', 'evolucion',
             'diagnostico_otros', 'notas'
         ];
-        const NUMERIC_FIELDS = ['edad_materna', 'g', 'p', 'c', 'a', 'num_controles', 'peso', 'talla', 'pc', 'eg', 'apgar1', 'apgar5'];
+        const NUMERIC_FIELDS = ['edad_materna', 'g', 'p', 'c', 'a', 'peso', 'talla', 'pc', 'eg', 'apgar1', 'apgar5'];
 
         // ------------------------------------------------------------------
         // UTILIDADES
@@ -588,38 +582,15 @@
                     ${inputF(p, 'c', 'C', 'number', 'min="0" max="20"')}
                     ${inputF(p, 'a', 'A', 'number', 'min="0" max="20"')}
                 </div>
-                <div class="flex flex-wrap items-end gap-x-8 gap-y-4">
-                    <div class="flex items-center gap-4 pb-2">
-                        <label for="${p}controlada" class="form-label">Embarazo controlado</label>
-                        <label class="switch"><input type="checkbox" id="${p}controlada" name="controlada"><span class="slider"></span></label>
-                    </div>
-                    <div class="flex-1 min-w-[160px] max-w-xs">
-                        ${inputF(p, 'num_controles', 'N° de controles', 'number', 'min="0" max="99"')}
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    ${selectF(p, 'grupo_materno', 'Grupo materno', GRUPOS)}
-                    ${selectF(p, 'rh_materno', 'Rh materno', RH)}
-                    ${selectF(p, 'grupo_paciente', 'Grupo paciente', GRUPOS)}
-                    ${selectF(p, 'rh_paciente', 'Rh paciente', RH)}
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                    ${selectF(p, 'pcd', 'PCD', PCD_PCI)}
-                    ${selectF(p, 'pci', 'PCI', PCD_PCI)}
-                </div>
-
                 <details id="${p}antpatologicos-details">
                     <summary>Antecedentes patológicos</summary>
                     <div class="details-content">${checkGrid('antPatologicos', ANT_PATOLOGICOS)}</div>
                 </details>
 
                 <h3 class="section-title pt-2">Condiciones del parto</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     ${selectF(p, 'tipo_nacimiento', 'Tipo de nacimiento', TIPO_NACIMIENTO)}
                     ${selectF(p, 'presentacion', 'Presentación', PRESENTACION)}
-                    ${selectF(p, 'membranas', 'Membranas', MEMBRANAS)}
-                    ${selectF(p, 'liquido_amniotico', 'Líquido amniótico', LIQUIDO)}
                     ${selectF(p, 'evolucion', 'Evolución', EVOLUCION)}
                 </div>
 
@@ -631,6 +602,11 @@
                     ${inputF(p, 'eg', 'EG (semanas)', 'number', 'min="20" max="45"')}
                     ${inputF(p, 'apgar1', 'Apgar 1', 'number', 'min="0" max="10"')}
                     ${inputF(p, 'apgar5', 'Apgar 5', 'number', 'min="0" max="10"')}
+                </div>
+                <div class="flex items-center gap-4">
+                    <label for="${p}requirio_rcp" class="form-label">Requirió RCP</label>
+                    <label class="switch"><input type="checkbox" id="${p}requirio_rcp" name="requirio_rcp"><span class="slider"></span></label>
+                    <span id="${p}requirio_rcp_text" class="text-sm font-bold text-gray-500 w-6">No</span>
                 </div>
 
                 <details id="${p}diagnostico-details">
@@ -661,6 +637,16 @@
             };
             otrosCb.addEventListener('change', form.updateOtros);
 
+            // Texto Sí/No junto al toggle de RCP
+            const rcp = form.elements['requirio_rcp'];
+            const rcpText = $(`${prefix}requirio_rcp_text`);
+            form.updateRcp = () => {
+                rcpText.textContent = rcp.checked ? 'Sí' : 'No';
+                rcpText.classList.toggle('text-red-600', rcp.checked);
+                rcpText.classList.toggle('text-gray-500', !rcp.checked);
+            };
+            rcp.addEventListener('change', form.updateRcp);
+
             // "Ninguno" en antecedentes es excluyente con el resto
             form.querySelectorAll('input[name="antPatologicos"]').forEach(cb => {
                 cb.addEventListener('change', () => {
@@ -680,7 +666,7 @@
                 const v = (fd.get(f) ?? '').toString().trim();
                 data[f] = v === '' ? null : Number(v);
             });
-            data.controlada = form.elements['controlada'].checked;
+            data.requirio_rcp = form.elements['requirio_rcp'].checked;
             data.antPatologicos = fd.getAll('antPatologicos');
             data.diagnostico = fd.getAll('diagnostico');
             if (!data.diagnostico.includes('otros')) data.diagnostico_otros = '';
@@ -691,7 +677,8 @@
             form.reset();
             TEXT_FIELDS.forEach(f => { if (form.elements[f]) form.elements[f].value = p[f] ?? ''; });
             NUMERIC_FIELDS.forEach(f => { if (form.elements[f]) form.elements[f].value = hasValue(p[f]) ? p[f] : ''; });
-            form.elements['controlada'].checked = !!p.controlada;
+            form.elements['requirio_rcp'].checked = !!p.requirio_rcp;
+            form.updateRcp();
             ['antPatologicos', 'diagnostico'].forEach(name => {
                 const values = Array.isArray(p[name]) ? p[name] : [];
                 form.querySelectorAll(`input[name="${name}"]`).forEach(cb => { cb.checked = values.includes(cb.value); });
@@ -706,6 +693,7 @@
             form.reset();
             form.querySelectorAll('details').forEach(d => d.open = false);
             form.updateOtros();
+            form.updateRcp();
         }
 
         $('ingreso-fields').innerHTML = patientFormHTML('');
@@ -926,7 +914,7 @@
                 tipo: $('filter-tipo-nacimiento').value,
                 ant: $('filter-ant-patologicos').value,
                 edad: [numFilter('filter-edad-materna-desde'), numFilter('filter-edad-materna-hasta')],
-                controles: [numFilter('filter-controles-desde'), numFilter('filter-controles-hasta')],
+                rcp: $('filter-rcp').value,
                 peso: [numFilter('filter-peso-desde'), numFilter('filter-peso-hasta')],
                 eg: [numFilter('filter-eg-desde'), numFilter('filter-eg-hasta')],
                 apgar1: [numFilter('filter-apgar1-desde'), numFilter('filter-apgar1-hasta')]
@@ -944,7 +932,7 @@
                 if (f.tipo && p.tipo_nacimiento !== f.tipo) return false;
                 if (f.ant && !(p.antPatologicos || []).includes(f.ant)) return false;
                 if (!inRange(p.edad_materna, ...f.edad)) return false;
-                if (!inRange(p.num_controles, ...f.controles)) return false;
+                if (f.rcp && !!p.requirio_rcp !== (f.rcp === 'si')) return false;
                 if (!inRange(p.peso, ...f.peso)) return false;
                 if (!inRange(p.eg, ...f.eg)) return false;
                 if (!inRange(p.apgar1, ...f.apgar1)) return false;
@@ -1082,52 +1070,77 @@
         });
 
         // ------------------------------------------------------------------
-        // EXPORTACIÓN CSV (Excel en español: separador ";" y UTF-8 con BOM)
+        // EXPORTACIÓN A EXCEL (.xlsx) — SheetJS se carga recién al exportar
         // ------------------------------------------------------------------
         const EXPORT_COLUMNS = [
-            ['apellido', 'Apellido'], ['nombre', 'Nombre'], ['fecha_nacimiento', 'Fecha nacimiento'], ['hora_nacimiento', 'Hora nacimiento'],
-            ['edad_materna', 'Edad materna'], ['g', 'G'], ['p', 'P'], ['c', 'C'], ['a', 'A'],
-            ['controlada', 'Controlada'], ['num_controles', 'N° controles'],
-            ['grupo_materno', 'Grupo materno'], ['rh_materno', 'Rh materno'], ['grupo_paciente', 'Grupo paciente'], ['rh_paciente', 'Rh paciente'],
-            ['pcd', 'PCD'], ['pci', 'PCI'], ['antPatologicos', 'Ant. patológicos'],
-            ['tipo_nacimiento', 'Tipo nacimiento'], ['presentacion', 'Presentación'], ['membranas', 'Membranas'],
-            ['liquido_amniotico', 'Líquido amniótico'], ['evolucion', 'Evolución'],
-            ['peso', 'Peso (gr)'], ['talla', 'Talla (cm)'], ['pc', 'PC (cm)'], ['eg', 'EG (sem)'], ['apgar1', 'Apgar 1'], ['apgar5', 'Apgar 5'],
-            ['diagnostico', 'Diagnóstico'], ['diagnostico_otros', 'Otros diagnósticos'], ['notas', 'Notas'],
-            ['createdBy', 'Ingresado por'], ['createdAt', 'Fecha de ingreso'], ['lastModifiedBy', 'Última edición por'], ['updatedAt', 'Fecha última edición']
+            ['apellido', 'Apellido', 16], ['nombre', 'Nombre', 16], ['fecha_nacimiento', 'Fecha nacimiento', 14], ['hora_nacimiento', 'Hora nacimiento', 10],
+            ['edad_materna', 'Edad materna', 8], ['g', 'G', 5], ['p', 'P', 5], ['c', 'C', 5], ['a', 'A', 5],
+            ['antPatologicos', 'Ant. patológicos', 24],
+            ['tipo_nacimiento', 'Tipo nacimiento', 12], ['presentacion', 'Presentación', 12], ['evolucion', 'Evolución', 18],
+            ['peso', 'Peso (gr)', 9], ['talla', 'Talla (cm)', 9], ['pc', 'PC (cm)', 8], ['eg', 'EG (sem)', 8],
+            ['apgar1', 'Apgar 1', 7], ['apgar5', 'Apgar 5', 7], ['requirio_rcp', 'Requirió RCP', 10],
+            ['diagnostico', 'Diagnóstico', 28], ['diagnostico_otros', 'Otros diagnósticos', 20], ['notas', 'Notas', 40],
+            ['createdBy', 'Ingresado por', 24], ['createdAt', 'Fecha de ingreso', 16], ['lastModifiedBy', 'Última edición por', 24], ['updatedAt', 'Fecha última edición', 16]
         ];
 
-        function csvValue(key, value) {
-            if (value === null || value === undefined) return '';
-            if (Array.isArray(value)) value = labelList(value);
-            else if (typeof value === 'boolean') value = value ? 'Sí' : 'No';
-            else if (value && value.toDate) value = formatTimestamp(value);
-            else if (key === 'fecha_nacimiento') value = formatDate(value);
-            else if (typeof value === 'number') value = String(value).replace('.', ',');
-            else value = label(value);
-            value = String(value);
-            if (/[;"\n\r]/.test(value)) value = `"${value.replace(/"/g, '""')}"`;
-            return value;
+        // Fecha/hora local -> número de serie de Excel (evita el corrimiento de huso horario de SheetJS)
+        const EXCEL_EPOCH = Date.UTC(1899, 11, 30);
+        const excelSerial = (y, m, d, hh = 0, mm = 0) => (Date.UTC(y, m - 1, d, hh, mm) - EXCEL_EPOCH) / 86400000;
+        const DATE_FORMATS = { fecha_nacimiento: 'dd/mm/yyyy', createdAt: 'dd/mm/yyyy hh:mm', updatedAt: 'dd/mm/yyyy hh:mm' };
+
+        function excelValue(key, value) {
+            if (key === 'requirio_rcp') return value ? 'Sí' : 'No';
+            if (value === null || value === undefined || value === '') return '';
+            if (Array.isArray(value)) return labelList(value);
+            if (typeof value === 'boolean') return value ? 'Sí' : 'No';
+            if (value.toDate) { const t = value.toDate(); return excelSerial(t.getFullYear(), t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes()); }
+            if (key === 'fecha_nacimiento') { const [y, m, d] = value.split('-').map(Number); return excelSerial(y, m, d); }
+            if (typeof value === 'number') return value;
+            return label(value);
         }
 
-        function exportToCSV(data, filename) {
+        let xlsxLoading = null;
+        function loadXlsx() {
+            if (window.XLSX) return Promise.resolve(window.XLSX);
+            xlsxLoading ??= new Promise((resolve, reject) => {
+                const sc = document.createElement('script');
+                sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+                sc.onload = () => resolve(window.XLSX);
+                sc.onerror = () => { xlsxLoading = null; reject(new Error('No se pudo cargar la librería de Excel')); };
+                document.head.appendChild(sc);
+            });
+            return xlsxLoading;
+        }
+
+        async function exportToExcel(data, filename) {
             if (data.length === 0) return showToast('No hay datos para exportar', 'error');
-            const lines = [EXPORT_COLUMNS.map(([, h]) => h).join(';')];
-            data.forEach(row => lines.push(EXPORT_COLUMNS.map(([k]) => csvValue(k, row[k])).join(';')));
-            const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            showToast('Exportación completada', 'success');
+            try {
+                const XLSX = await loadXlsx();
+                const rows = data.map(row => EXPORT_COLUMNS.map(([k]) => excelValue(k, row[k])));
+                const ws = XLSX.utils.aoa_to_sheet([EXPORT_COLUMNS.map(([, h]) => h), ...rows]);
+                // Formato de fechas en español
+                const dateCols = EXPORT_COLUMNS.map(([k], i) => [k, i]).filter(([k]) => DATE_FORMATS[k]);
+                for (let r = 1; r <= rows.length; r++) {
+                    dateCols.forEach(([k, c]) => {
+                        const cell = ws[XLSX.utils.encode_cell({ r, c })];
+                        if (cell && cell.t === 'n') cell.z = DATE_FORMATS[k];
+                    });
+                }
+                ws['!cols'] = EXPORT_COLUMNS.map(([, , w]) => ({ wch: w }));
+                ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows.length, c: EXPORT_COLUMNS.length - 1 } }) };
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Nacimientos');
+                XLSX.writeFile(wb, filename);
+                showToast('Exportación completada', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Error al exportar: ' + err.message, 'error');
+            }
         }
 
         const today = () => new Date().toISOString().slice(0, 10);
-        $('export-all-button').addEventListener('click', () => exportToCSV(allPatients, `nacimientos_sjd_todos_${today()}.csv`));
-        $('export-filtered-button').addEventListener('click', () => exportToCSV(filteredPatients, `nacimientos_sjd_filtrados_${today()}.csv`));
+        $('export-all-button').addEventListener('click', () => exportToExcel(allPatients, `nacimientos_sjd_todos_${today()}.xlsx`));
+        $('export-filtered-button').addEventListener('click', () => exportToExcel(filteredPatients, `nacimientos_sjd_filtrados_${today()}.xlsx`));
 
         // ------------------------------------------------------------------
         // DASHBOARD
