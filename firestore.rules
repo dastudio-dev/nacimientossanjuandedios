@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// Reglas de Firestore - Nacimientos San Juan de Dios
+// Solo pueden leer/escribir pacientes los usuarios con email VERIFICADO
+// que figuren en la colección "autorizados" (ID del documento = email en minúsculas).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autorizado() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/autorizados/$(request.auth.token.email.lower()));
+    }
+
+    match /pacientes/{pacienteId} {
+      allow read, create, update: if autorizado();
+      allow delete: if false; // los registros no se borran desde la app
+    }
+
+    // Cada usuario solo puede consultar si su propio email está autorizado.
+    // La lista se administra desde la consola de Firebase.
+    match /autorizados/{email} {
+      allow read: if request.auth != null && request.auth.token.email.lower() == email;
+      allow write: if false;
+    }
+  }
+}

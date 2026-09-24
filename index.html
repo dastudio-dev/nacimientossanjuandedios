@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nacimientos San Juan de Dios</title>
+    <meta name="theme-color" content="#003989">
+
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sjd: {
+                            azul: '#003989',      // azul institucional
+                            'azul-osc': '#002a66',
+                            celeste: '#00a7e5',   // celeste institucional
+                            fondo: '#eff7fe',
+                            claro: '#e3f1fd'
+                        }
+                    },
+                    fontFamily: { sans: ['"Open Sans"', 'system-ui', 'sans-serif'] }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* --- IDENTIDAD CASA HOSPITAL SAN JUAN DE DIOS --- */
+        :root {
+            --sjd-azul: #003989;
+            --sjd-azul-osc: #002a66;
+            --sjd-celeste: #00a7e5;
+            --sjd-fondo: #eff7fe;
+            --sjd-claro: #e3f1fd;
+        }
+        body { font-family: 'Open Sans', system-ui, sans-serif; background-color: var(--sjd-fondo); }
+        .title-text { color: var(--sjd-azul); }
+
+        /* Botones */
+        .btn-primary {
+            background-color: var(--sjd-azul); color: white; padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; font-weight: 700; transition: background-color 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:hover { background-color: var(--sjd-azul-osc); }
+        .btn-primary:disabled { opacity: 0.6; cursor: wait; }
+
+        .btn-secondary {
+            background-color: #f3f4f6; color: #374151; padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; font-weight: 600; border: 1px solid #d1d5db;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover { background-color: #e5e7eb; }
+
+        .btn-export {
+            background-color: #059669; color: white; padding: 0.5rem 1rem;
+            border-radius: 0.5rem; font-weight: 600; transition: background-color 0.3s; font-size: 0.875rem;
+        }
+        .btn-export:hover { background-color: #047857; }
+
+        .btn-edit {
+            background-color: var(--sjd-celeste); color: white; padding: 0.3rem 0.75rem;
+            border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; transition: background-color 0.3s;
+        }
+        .btn-edit:hover { background-color: #0090c7; }
+
+        .link { color: var(--sjd-azul); font-weight: 600; }
+        .link:hover { color: var(--sjd-celeste); }
+
+        /* Formularios */
+        .form-input {
+            width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #d1d5db;
+            border-radius: 0.5rem; transition: border-color 0.3s, box-shadow 0.3s; background: white;
+        }
+        .form-input:focus {
+            border-color: var(--sjd-celeste); box-shadow: 0 0 0 3px rgba(0, 167, 229, 0.2); outline: none;
+        }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; }
+        .section-title {
+            font-size: 1.05rem; font-weight: 700; color: var(--sjd-azul);
+            border-bottom: 2px solid var(--sjd-claro); padding-bottom: 0.4rem;
+        }
+        .filter-section-title {
+            color: var(--sjd-azul); font-weight: 700; border-bottom: 2px solid var(--sjd-claro);
+            padding-bottom: 0.25rem; margin-bottom: 0.75rem; font-size: 0.95rem;
+        }
+        .filter-panel .form-input { padding: 0.5rem; font-size: 0.875rem; border-radius: 0.375rem; }
+
+        /* Checkbox grid */
+        .checkbox-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.5rem; background-color: #f9fafb; padding: 1rem;
+            border-radius: 0.5rem; border: 1px solid #e5e7eb;
+        }
+        .checkbox-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer; padding: 0.25rem; }
+        .checkbox-item:hover { background-color: var(--sjd-fondo); border-radius: 0.25rem; }
+        .checkbox-item input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--sjd-azul); }
+
+        /* Pestañas (estilo auditoría) */
+        .tab-btn {
+            padding: 0.9rem 1.4rem; font-weight: 600; border-radius: 0.5rem 0.5rem 0 0;
+            transition: all 0.3s; border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active { background-color: var(--sjd-fondo); color: var(--sjd-azul); border-bottom-color: var(--sjd-celeste); }
+        .tab-btn.inactive { background-color: transparent; color: #6b7280; }
+        .tab-btn.inactive:hover { background-color: var(--sjd-claro); color: var(--sjd-azul); }
+
+        /* Details */
+        details { border: 1px solid #e5e7eb; border-radius: 0.5rem; }
+        details summary { font-weight: 600; padding: 0.9rem 1rem; cursor: pointer; background-color: #f9fafb; border-radius: 0.5rem; color: var(--sjd-azul); }
+        details[open] summary { border-bottom: 1px solid #e5e7eb; border-radius: 0.5rem 0.5rem 0 0; }
+        details .details-content { padding: 1.25rem; background-color: white; border-radius: 0 0 0.5rem 0.5rem; }
+
+        /* Switch */
+        .switch { position: relative; display: inline-block; width: 52px; height: 30px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .3s; border-radius: 30px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--sjd-azul); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Dashboard */
+        .stat-card {
+            background: white; padding: 1.25rem 1.5rem; border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            border-left: 4px solid var(--sjd-azul); transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .chart-card {
+            background: white; padding: 1rem 1rem 1.25rem; border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column;
+        }
+        .chart-card h3 { font-size: 1rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem; }
+        .chart-box { position: relative; height: 280px; width: 100%; }
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
+            padding: 1rem 2rem; border-radius: 0.5rem; color: white; font-weight: 600; max-width: 90vw;
+            z-index: 100; opacity: 0; transition: opacity 0.4s, transform 0.4s; visibility: hidden; text-align: center;
+        }
+        #toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        #toast.success { background-color: #16a34a; }
+        #toast.error { background-color: #dc2626; }
+    </style>
+</head>
+
+<body class="text-gray-900 min-h-screen flex flex-col">
+
+    <!-- CARGANDO -->
+    <div id="loading-view" class="flex items-center justify-center min-h-screen">
+        <div class="text-center px-4">
+            <img src="img/granada-azul.png" alt="" class="h-16 mx-auto mb-4 animate-pulse">
+            <div id="loading-text" class="text-lg font-semibold title-text">Cargando aplicación...</div>
+        </div>
+    </div>
+
+    <!-- LOGIN / REGISTRO -->
+    <div id="login-view" class="hidden min-h-screen bg-sjd-azul flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
+            <div class="text-center mb-8">
+                <img src="img/granada-azul.png" alt="Casa Hospital San Juan de Dios" class="h-20 mx-auto mb-4">
+                <h1 class="text-2xl font-extrabold title-text">Nacimientos San Juan de Dios</h1>
+                <p class="text-sm text-gray-500 mt-1">Casa Hospital San Juan de Dios · Ramos Mejía</p>
+            </div>
+
+            <form id="login-form">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Iniciar sesión</h2>
+                <div class="mb-4">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-input mt-1" autocomplete="email" required>
+                </div>
+                <div class="mb-2">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" name="password" class="form-input mt-1" autocomplete="current-password" required>
+                </div>
+                <p class="text-right mb-6"><a href="#" id="forgot-password" class="text-xs link">¿Olvidaste tu contraseña?</a></p>
+                <button type="submit" class="btn-primary w-full">Ingresar</button>
+                <p class="text-sm text-center mt-4">
+                    ¿No tenés cuenta? <a href="#" id="show-signup" class="link">Registrate acá</a>
+                </p>
+            </form>
+
+            <form id="signup-form" class="hidden">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Crear cuenta</h2>
+                <div class="mb-4">
+                    <label for="signup-email" class="form-label">Email</label>
+                    <input type="email" id="signup-email" name="signup-email" class="form-input mt-1" autocomplete="email" required>
+                </div>
+                <div class="mb-6">
+                    <label for="signup-password" class="form-label">Contraseña (mínimo 6 caracteres)</label>
+                    <input type="password" id="signup-password" name="signup-password" class="form-input mt-1" minlength="6" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Registrarme</button>
+                <p class="text-sm text-center mt-4">
+                    ¿Ya tenés cuenta? <a href="#" id="show-login" class="link">Iniciá sesión</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUENTA PENDIENTE (email sin verificar o sin autorizar) -->
+    <div id="pending-view" class="hidden min-h-screen bg-sjd-azul flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl text-center">
+            <img src="img/granada-azul.png" alt="" class="h-16 mx-auto mb-4">
+            <h1 id="pending-title" class="text-xl font-bold title-text mb-3"></h1>
+            <div id="pending-message" class="text-sm text-gray-600 space-y-2 mb-6"></div>
+            <div class="flex flex-col gap-2">
+                <button id="pending-retry" class="btn-primary w-full">Ya lo hice, reintentar</button>
+                <button id="pending-resend" class="btn-secondary w-full hidden">Reenviar email de verificación</button>
+                <button id="pending-logout" class="text-sm link mt-2">Salir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN -->
+    <div id="app-view" class="hidden flex-1 flex flex-col">
+
+        <header class="bg-sjd-azul text-white shadow-lg sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <img src="img/logo-hsjd-blanco.png" alt="Casa Hospital San Juan de Dios - Ramos Mejía / Castelar" class="hidden md:block h-11">
+                    <img src="img/granada-blanca.png" alt="Casa Hospital San Juan de Dios" class="md:hidden h-9">
+                    <div class="hidden md:block w-px h-10 bg-white/40"></div>
+                    <h1 class="text-base sm:text-lg md:text-xl font-bold leading-tight">Nacimientos San Juan de Dios</h1>
+                </div>
+                <div class="flex items-center shrink-0">
+                    <span id="user-email" class="text-sm mr-4 hidden lg:block text-sjd-claro"></span>
+                    <button id="logout-button" class="bg-white text-sjd-azul font-bold py-2 px-4 rounded-lg shadow hover:bg-sjd-claro transition text-sm">
+                        Salir
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="container mx-auto px-4 sm:px-8 mt-6">
+            <div class="flex overflow-x-auto gap-x-2 border-b border-gray-200 bg-white rounded-t-lg p-2 shadow-sm">
+                <button id="tab-ingreso" class="tab-btn active whitespace-nowrap">📝 Ingreso</button>
+                <button id="tab-consultas" class="tab-btn inactive whitespace-nowrap">📋 Consultas &amp; Reportes</button>
+                <button id="tab-dashboard" class="tab-btn inactive whitespace-nowrap">📊 Dashboard Estadístico</button>
+            </div>
+        </nav>
+
+        <main class="container mx-auto px-4 sm:px-8 mb-12 flex-1">
+
+            <!-- INGRESO -->
+            <div id="ingreso-view" class="p-5 sm:p-8 bg-white shadow-lg rounded-b-lg">
+                <h2 class="text-2xl font-bold title-text mb-6">Nuevo ingreso de paciente</h2>
+                <form id="ingreso-form" class="space-y-6" autocomplete="off">
+                    <div id="ingreso-fields" class="space-y-6"></div>
+                    <div class="pt-4 text-right">
+                        <button type="submit" class="btn-primary">Guardar paciente</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- CONSULTAS (estilo auditoría) -->
+            <div id="consultas-view" class="hidden bg-gray-50 border-x border-b border-gray-200 shadow-lg rounded-b-lg p-4 sm:p-6">
+                <div class="filter-panel bg-white p-6 rounded-lg shadow mb-8 border border-gray-200">
+                    <h2 class="text-xl font-bold title-text mb-6 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        Filtros avanzados de reporte
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                        <div class="space-y-3">
+                            <h3 class="filter-section-title">Datos generales</h3>
+                            <div>
+                                <label class="block text-gray-700 font-medium">Apellido o nombre</label>
+                                <input type="text" id="search-nombre" class="form-input" placeholder="Ej: Pérez Juan">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-gray-700 font-medium text-xs">Nacido desde</label><input type="date" id="search-fecha-desde" class="form-input"></div>
+                                <div><label class="block text-gray-700 font-medium text-xs">Nacido hasta</label><input type="date" id="search-fecha-hasta" class="form-input"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-gray-700 font-medium text-xs">Edad mat. mín.</label><input type="number" id="filter-edad-materna-desde" class="form-input" min="10"></div>
+                                <div><label class="block text-gray-700 font-medium text-xs">Edad mat. máx.</label><input type="number" id="filter-edad-materna-hasta" class="form-input" min="10"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-gray-700 font-medium text-xs">Controles mín.</label><input type="number" id="filter-controles-desde" class="form-input" min="0"></div>
+                                <div><label class="block text-gray-700 font-medium text-xs">Controles máx.</label><input type="number" id="filter-controles-hasta" class="form-input" min="0"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h3 class="filter-section-title">Clínica &amp; evolución</h3>
+                            <div><label class="block text-gray-700 font-medium">Diagnóstico</label><select id="filter-diagnostico" class="form-input"></select></div>
+                            <div><label class="block text-gray-700 font-medium">Evolución</label><select id="filter-evolucion" class="form-input"></select></div>
+                            <div><label class="block text-gray-700 font-medium">Tipo de nacimiento</label><select id="filter-tipo-nacimiento" class="form-input"></select></div>
+                            <div><label class="block text-gray-700 font-medium">Ant. patológicos</label><select id="filter-ant-patologicos" class="form-input"></select></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h3 class="filter-section-title">Medidas &amp; Apgar</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-gray-700 font-medium text-xs">Peso mín. (gr)</label><input type="number" id="filter-peso-desde" class="form-input" min="0"></div>
+                                <div><label class="block text-gray-700 font-medium text-xs">Peso máx. (gr)</label><input type="number" id="filter-peso-hasta" class="form-input" min="0"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-gray-700 font-medium text-xs">EG mín. (sem)</label><input type="number" id="filter-eg-desde" class="form-input" min="20" max="45"></div>
+                                <div><label class="block text-gray-700 font-medium text-xs">EG máx. (sem)</label><input type="number" id="filter-eg-hasta" class="form-input" min="20" max="45"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="block text-gray-700 font-medium text-xs">Apgar 1 mín.</label><input type="number" id="filter-apgar1-desde" class="form-input" min="0" max="10"></div>
+                                <div><label class="block text-gray-700 font-medium text-xs">Apgar 1 máx.</label><input type="number" id="filter-apgar1-hasta" class="form-input" min="0" max="10"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 flex flex-col h-full">
+                            <h3 class="filter-section-title">Acciones</h3>
+                            <div class="mt-auto space-y-2 pt-4">
+                                <p class="text-sm text-gray-500 mb-2">Presione para actualizar resultados.</p>
+                                <div class="flex flex-col gap-2">
+                                    <button id="search-button" class="btn-primary w-full text-sm">Aplicar filtros</button>
+                                    <button id="clear-search-button" class="btn-secondary w-full text-sm">Limpiar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="p-4 border-b flex flex-wrap gap-3 justify-between items-center bg-gray-50">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h3 class="font-bold text-gray-700">Resultados</h3>
+                            <span id="result-count" class="bg-sjd-claro text-sjd-azul text-xs font-semibold px-2.5 py-0.5 rounded-full"></span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="export-filtered-button" class="btn-export hidden">Exportar filtrados</button>
+                            <button id="export-all-button" class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold py-2 px-3 rounded-lg">Exportar todo</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Paciente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fecha nac.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Peso / EG</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Diagnóstico</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Evolución</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ingresado por</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Última edición</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pacientes-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD (estilo auditoría) -->
+            <div id="dashboard-view" class="hidden bg-gray-50 border-x border-b border-gray-200 shadow-lg rounded-b-lg p-4 sm:p-6 space-y-6">
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-sjd-claro flex flex-wrap gap-4 items-end">
+                    <div>
+                        <label for="dash-year" class="form-label">Año</label>
+                        <select id="dash-year" class="form-input mt-1 w-32 font-semibold"></select>
+                    </div>
+                    <div>
+                        <label for="dash-month" class="form-label">Mes</label>
+                        <select id="dash-month" class="form-input mt-1 w-44 font-semibold">
+                            <option value="">Todo el año</option>
+                            <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+                            <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+                            <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+                            <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="stat-card" style="border-left-color:#003989">
+                        <p class="text-sm text-gray-500 uppercase font-bold">Total nacimientos</p>
+                        <p class="text-3xl font-extrabold text-gray-800" id="kpi-total">0</p>
+                        <p class="text-xs text-gray-400 mt-1">En el período seleccionado</p>
+                    </div>
+                    <div class="stat-card" style="border-left-color:#00a7e5">
+                        <p class="text-sm text-gray-500 uppercase font-bold">Tasa de cesáreas</p>
+                        <p class="text-3xl font-extrabold text-gray-800" id="kpi-cesareas">0%</p>
+                        <p class="text-xs text-gray-400 mt-1" id="kpi-cesareas-sub">Sobre nacimientos con tipo registrado</p>
+                    </div>
+                    <div class="stat-card" style="border-left-color:#1baf7a">
+                        <p class="text-sm text-gray-500 uppercase font-bold">Peso promedio</p>
+                        <p class="text-3xl font-extrabold text-gray-800" id="kpi-peso">–</p>
+                        <p class="text-xs text-gray-400 mt-1" id="kpi-peso-sub">Sobre nacimientos con peso registrado</p>
+                    </div>
+                    <div class="stat-card" style="border-left-color:#eb6834">
+                        <p class="text-sm text-gray-500 uppercase font-bold">Prematurez (&lt;37 sem)</p>
+                        <p class="text-3xl font-extrabold text-gray-800" id="kpi-prematuros">0%</p>
+                        <p class="text-xs text-gray-400 mt-1" id="kpi-prematuros-sub">Sobre nacimientos con EG registrada</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="chart-card"><h3 id="chart-time-title">Evolución de nacimientos</h3><div class="chart-box"><canvas id="chart-tiempo"></canvas></div></div>
+                    <div class="chart-card"><h3>Distribución de peso al nacer</h3><div class="chart-box"><canvas id="chart-peso"></canvas></div></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="chart-card"><h3>Tipo de nacimiento</h3><div class="chart-box"><canvas id="chart-tipo"></canvas></div></div>
+                    <div class="chart-card lg:col-span-2"><h3>Top 5 diagnósticos frecuentes</h3><div class="chart-box"><canvas id="chart-diagnosticos"></canvas></div></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="chart-card"><h3>Evolución / destino del RN</h3><div class="chart-box"><canvas id="chart-evolucion"></canvas></div></div>
+                    <div class="chart-card"><h3>Grupos de edad materna</h3><div class="chart-box"><canvas id="chart-edad-materna"></canvas></div></div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center text-xs text-gray-500 pb-6">
+            Casa Hospital San Juan de Dios · Ramos Mejía / Castelar · Argentina
+        </footer>
+    </div>
+
+    <!-- MODAL DE EDICIÓN -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-gray-900/60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <header class="flex justify-between items-start p-6 border-b bg-sjd-fondo sticky top-0 z-10">
+                <div>
+                    <h2 class="text-2xl font-bold title-text">Editar paciente</h2>
+                    <p id="edit-meta" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+                <button type="button" id="close-edit-modal" class="text-gray-400 hover:text-gray-600 text-3xl leading-none" aria-label="Cerrar">&times;</button>
+            </header>
+            <form id="edit-form" class="p-5 sm:p-8 space-y-6" autocomplete="off">
+                <div id="edit-fields" class="space-y-6"></div>
+                <footer class="flex justify-end gap-4 pt-4">
+                    <button type="button" class="btn-secondary" id="cancel-edit-button">Cerrar</button>
+                    <button type="submit" class="btn-primary" id="save-edit-button">Guardar cambios</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged,
+            signOut, sendEmailVerification, sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+            getFirestore, collection, addDoc, onSnapshot, doc, getDoc, updateDoc, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // ------------------------------------------------------------------
+        // CONFIGURACIÓN FIREBASE (proyecto propio de San Juan de Dios)
+        // Pegar acá los valores de: Consola Firebase > Configuración del proyecto > Tus apps > Web
+        // ------------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "COMPLETAR",
+            authDomain: "COMPLETAR.firebaseapp.com",
+            projectId: "COMPLETAR",
+            storageBucket: "COMPLETAR.firebasestorage.app",
+            messagingSenderId: "COMPLETAR",
+            appId: "COMPLETAR"
+        };
+
+        // ------------------------------------------------------------------
+        // CATÁLOGOS (única fuente para formulario, filtros, tabla, CSV y gráficos)
+        // ------------------------------------------------------------------
+        const GRUPOS = [['A', 'A'], ['B', 'B'], ['AB', 'AB'], ['0', '0']];
+        const RH = [['+', '+'], ['-', '-']];
+        const PCD_PCI = [['negativo', 'Negativo'], ['positivo', 'Positivo']];
+        const TIPO_NACIMIENTO = [['parto', 'Parto'], ['cesarea', 'Cesárea']];
+        const PRESENTACION = [['cefalica', 'Cefálica'], ['transversa', 'Transversa'], ['podalica', 'Podálica']];
+        const MEMBRANAS = [['rotura_espontanea', 'Rotura espontánea'], ['rotura_artificial', 'Rotura artificial'], ['rotura_prematura', 'Rotura prematura']];
+        const LIQUIDO = [['claro', 'Claro'], ['meconial', 'Meconial'], ['sanguinolento', 'Sanguinolento']];
+        const EVOLUCION = [['internacion_conjunta', 'Internación conjunta'], ['utin', 'UTIN'], ['obito', 'Óbito']];
+        const ANT_PATOLOGICOS = [
+            ['ninguno', 'Ninguno'], ['hta', 'HTA'], ['dbt', 'DBT'], ['dbt_gestacional', 'DBT gestacional'],
+            ['hipotiroidismo', 'Hipotiroidismo'], ['hipertiroidismo', 'Hipertiroidismo'],
+            ['infeccion_urinaria', 'Infección urinaria'], ['consumo_problematico', 'Consumo problemático'], ['otras', 'Otras']
+        ];
+        const DIAGNOSTICOS = [
+            ['rnt_paeg', 'RNT-PAEG'], ['rnt_apeg', 'RNT-APEG'], ['rnt_bpeg', 'RNT-BPEG'],
+            ['rnpt_paeg', 'RNPT-PAEG'], ['rnpt_bpeg', 'RNPT-BPEG'], ['rnpt_apeg', 'RNPT-APEG'],
+            ['rnpost_paeg', 'RNPOST-PAEG'], ['rnpost_bpeg', 'RNPOST-BPEG'], ['rnpost_apeg', 'RNPOST-APEG'],
+            ['asfixia', 'Asfixia'], ['dif_respiratoria', 'Dificultad respiratoria'], ['causa_social', 'Causa social'],
+            ['hijo_madre_consumo', 'Hijo de madre con consumo'], ['otros', 'Otros']
+        ];
+
+        const LABELS = Object.fromEntries(
+            [TIPO_NACIMIENTO, PRESENTACION, MEMBRANAS, LIQUIDO, EVOLUCION, PCD_PCI, ANT_PATOLOGICOS, DIAGNOSTICOS].flat()
+        );
+        const label = (v) => (v === null || v === undefined || v === '') ? '' : (LABELS[v] ?? String(v));
+        const labelList = (arr) => (Array.isArray(arr) ? arr : []).map(label).join(', ');
+
+        const TEXT_FIELDS = [
+            'apellido', 'nombre', 'fecha_nacimiento', 'hora_nacimiento',
+            'grupo_materno', 'rh_materno', 'grupo_paciente', 'rh_paciente', 'pcd', 'pci',
+            'tipo_nacimiento', 'presentacion', 'membranas', 'liquido_amniotico', 'evolucion',
+            'diagnostico_otros', 'notas'
+        ];
+        const NUMERIC_FIELDS = ['edad_materna', 'g', 'p', 'c', 'a', 'num_controles', 'peso', 'talla', 'pc', 'eg', 'apgar1', 'apgar5'];
+
+        // ------------------------------------------------------------------
+        // UTILIDADES
+        // ------------------------------------------------------------------
+        const $ = (id) => document.getElementById(id);
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function formatDate(str) {
+            if (!str) return '-';
+            const [y, m, d] = str.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function formatTimestamp(ts) {
+            if (!ts || !ts.toDate) return '';
+            return ts.toDate().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        }
+
+        const hasValue = (v) => v !== null && v !== undefined && v !== '' && !Number.isNaN(Number(v));
+
+        function showToast(msg, type = 'success') {
+            const t = $('toast');
+            t.textContent = msg; t.className = type; t.classList.add('show');
+            clearTimeout(showToast._timer);
+            showToast._timer = setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        const AUTH_ERRORS = {
+            'auth/invalid-credential': 'Email o contraseña incorrectos.',
+            'auth/wrong-password': 'Email o contraseña incorrectos.',
+            'auth/user-not-found': 'Email o contraseña incorrectos.',
+            'auth/invalid-email': 'El email no es válido.',
+            'auth/email-already-in-use': 'Ya existe una cuenta con ese email.',
+            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+            'auth/too-many-requests': 'Demasiados intentos. Esperá unos minutos y volvé a probar.',
+            'auth/network-request-failed': 'Error de conexión. Revisá internet.',
+            'auth/missing-email': 'Ingresá tu email.'
+        };
+        const authError = (e) => AUTH_ERRORS[e.code] || e.message;
+
+        // ------------------------------------------------------------------
+        // FORMULARIO DE PACIENTE (se genera una vez para Ingreso y otra para Edición)
+        // ------------------------------------------------------------------
+        const opts = (list, placeholder = 'Seleccionar...') =>
+            `<option value="">${placeholder}</option>` + list.map(([v, l]) => `<option value="${escapeHtml(v)}">${escapeHtml(l)}</option>`).join('');
+
+        const field = (p, name, text, input) => `<div><label for="${p}${name}" class="form-label">${text}</label>${input}</div>`;
+        const inputF = (p, name, text, type, attrs = '') => field(p, name, text, `<input type="${type}" id="${p}${name}" name="${name}" class="form-input mt-1" ${attrs}>`);
+        const selectF = (p, name, text, list) => field(p, name, text, `<select id="${p}${name}" name="${name}" class="form-input mt-1">${opts(list)}</select>`);
+        const checkGrid = (name, list) => `<div class="checkbox-grid">${list.map(([v, l]) =>
+            `<label class="checkbox-item"><input type="checkbox" name="${name}" value="${v}"> ${escapeHtml(l)}</label>`).join('')}</div>`;
+
+        function patientFormHTML(p) {
+            return `
+                <h3 class="section-title">Datos del paciente</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    ${inputF(p, 'apellido', 'Apellido', 'text', 'required')}
+                    ${inputF(p, 'nombre', 'Nombre', 'text', 'required')}
+                    ${inputF(p, 'fecha_nacimiento', 'Fecha de nacimiento', 'date', 'required')}
+                    ${inputF(p, 'hora_nacimiento', 'Hora de nacimiento', 'time', 'required')}
+                </div>
+
+                <h3 class="section-title pt-2">Datos maternos</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+                    ${inputF(p, 'edad_materna', 'Edad materna', 'number', 'min="10" max="65"')}
+                    ${inputF(p, 'g', 'G', 'number', 'min="0" max="20"')}
+                    ${inputF(p, 'p', 'P', 'number', 'min="0" max="20"')}
+                    ${inputF(p, 'c', 'C', 'number', 'min="0" max="20"')}
+                    ${inputF(p, 'a', 'A', 'number', 'min="0" max="20"')}
+                </div>
+                <div class="flex flex-wrap items-end gap-x-8 gap-y-4">
+                    <div class="flex items-center gap-4 pb-2">
+                        <label for="${p}controlada" class="form-label">Embarazo controlado</label>
+                        <label class="switch"><input type="checkbox" id="${p}controlada" name="controlada"><span class="slider"></span></label>
+                    </div>
+                    <div class="flex-1 min-w-[160px] max-w-xs">
+                        ${inputF(p, 'num_controles', 'N° de controles', 'number', 'min="0" max="99"')}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    ${selectF(p, 'grupo_materno', 'Grupo materno', GRUPOS)}
+                    ${selectF(p, 'rh_materno', 'Rh materno', RH)}
+                    ${selectF(p, 'grupo_paciente', 'Grupo paciente', GRUPOS)}
+                    ${selectF(p, 'rh_paciente', 'Rh paciente', RH)}
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    ${selectF(p, 'pcd', 'PCD', PCD_PCI)}
+                    ${selectF(p, 'pci', 'PCI', PCD_PCI)}
+                </div>
+
+                <details id="${p}antpatologicos-details">
+                    <summary>Antecedentes patológicos</summary>
+                    <div class="details-content">${checkGrid('antPatologicos', ANT_PATOLOGICOS)}</div>
+                </details>
+
+                <h3 class="section-title pt-2">Condiciones del parto</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    ${selectF(p, 'tipo_nacimiento', 'Tipo de nacimiento', TIPO_NACIMIENTO)}
+                    ${selectF(p, 'presentacion', 'Presentación', PRESENTACION)}
+                    ${selectF(p, 'membranas', 'Membranas', MEMBRANAS)}
+                    ${selectF(p, 'liquido_amniotico', 'Líquido amniótico', LIQUIDO)}
+                    ${selectF(p, 'evolucion', 'Evolución', EVOLUCION)}
+                </div>
+
+                <h3 class="section-title pt-2">Datos del recién nacido</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    ${inputF(p, 'peso', 'Peso (gr)', 'number', 'min="200" max="7000"')}
+                    ${inputF(p, 'talla', 'Talla (cm)', 'number', 'min="20" max="70" step="0.1"')}
+                    ${inputF(p, 'pc', 'PC (cm)', 'number', 'min="15" max="50" step="0.1"')}
+                    ${inputF(p, 'eg', 'EG (semanas)', 'number', 'min="20" max="45"')}
+                    ${inputF(p, 'apgar1', 'Apgar 1', 'number', 'min="0" max="10"')}
+                    ${inputF(p, 'apgar5', 'Apgar 5', 'number', 'min="0" max="10"')}
+                </div>
+
+                <details id="${p}diagnostico-details">
+                    <summary>Diagnóstico</summary>
+                    <div class="details-content">
+                        ${checkGrid('diagnostico', DIAGNOSTICOS)}
+                        <div id="${p}diagnostico_otros_wrapper" class="hidden mt-4">
+                            ${inputF(p, 'diagnostico_otros', 'Otros diagnósticos', 'text')}
+                        </div>
+                    </div>
+                </details>
+
+                <h3 class="section-title pt-2">Notas adicionales</h3>
+                <div>
+                    <label for="${p}notas" class="form-label">Notas</label>
+                    <textarea id="${p}notas" name="notas" class="form-input mt-1" rows="4"></textarea>
+                </div>`;
+        }
+
+        function setupPatientForm(form, prefix) {
+            // "Otros" diagnósticos muestra el campo de texto
+            const otrosCb = form.querySelector('input[name="diagnostico"][value="otros"]');
+            const wrapper = $(`${prefix}diagnostico_otros_wrapper`);
+            const otrosInput = $(`${prefix}diagnostico_otros`);
+            form.updateOtros = () => {
+                wrapper.classList.toggle('hidden', !otrosCb.checked);
+                otrosInput.required = otrosCb.checked;
+            };
+            otrosCb.addEventListener('change', form.updateOtros);
+
+            // "Ninguno" en antecedentes es excluyente con el resto
+            form.querySelectorAll('input[name="antPatologicos"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (!cb.checked) return;
+                    form.querySelectorAll('input[name="antPatologicos"]').forEach(other => {
+                        if (other !== cb && (cb.value === 'ninguno' || other.value === 'ninguno')) other.checked = false;
+                    });
+                });
+            });
+        }
+
+        function collectPatientForm(form) {
+            const fd = new FormData(form);
+            const data = {};
+            TEXT_FIELDS.forEach(f => { data[f] = (fd.get(f) ?? '').toString().trim(); });
+            NUMERIC_FIELDS.forEach(f => {
+                const v = (fd.get(f) ?? '').toString().trim();
+                data[f] = v === '' ? null : Number(v);
+            });
+            data.controlada = form.elements['controlada'].checked;
+            data.antPatologicos = fd.getAll('antPatologicos');
+            data.diagnostico = fd.getAll('diagnostico');
+            if (!data.diagnostico.includes('otros')) data.diagnostico_otros = '';
+            return data;
+        }
+
+        function fillPatientForm(form, prefix, p) {
+            form.reset();
+            TEXT_FIELDS.forEach(f => { if (form.elements[f]) form.elements[f].value = p[f] ?? ''; });
+            NUMERIC_FIELDS.forEach(f => { if (form.elements[f]) form.elements[f].value = hasValue(p[f]) ? p[f] : ''; });
+            form.elements['controlada'].checked = !!p.controlada;
+            ['antPatologicos', 'diagnostico'].forEach(name => {
+                const values = Array.isArray(p[name]) ? p[name] : [];
+                form.querySelectorAll(`input[name="${name}"]`).forEach(cb => { cb.checked = values.includes(cb.value); });
+            });
+            const ant = p.antPatologicos || [];
+            $(`${prefix}antpatologicos-details`).open = ant.length > 0 && !(ant.length === 1 && ant[0] === 'ninguno');
+            $(`${prefix}diagnostico-details`).open = (p.diagnostico || []).length > 0;
+            form.updateOtros();
+        }
+
+        function resetPatientForm(form) {
+            form.reset();
+            form.querySelectorAll('details').forEach(d => d.open = false);
+            form.updateOtros();
+        }
+
+        $('ingreso-fields').innerHTML = patientFormHTML('');
+        $('edit-fields').innerHTML = patientFormHTML('edit-');
+        const ingresoForm = $('ingreso-form');
+        const editForm = $('edit-form');
+        setupPatientForm(ingresoForm, '');
+        setupPatientForm(editForm, 'edit-');
+
+        // Opciones de filtros de Consultas
+        $('filter-diagnostico').innerHTML = opts(DIAGNOSTICOS, 'Cualquiera');
+        $('filter-evolucion').innerHTML = opts(EVOLUCION, 'Cualquiera');
+        $('filter-tipo-nacimiento').innerHTML = opts(TIPO_NACIMIENTO, 'Cualquiera');
+        $('filter-ant-patologicos').innerHTML = opts(ANT_PATOLOGICOS.filter(([v]) => v !== 'ninguno'), 'Cualquiera');
+
+        // ------------------------------------------------------------------
+        // FIREBASE
+        // ------------------------------------------------------------------
+        const views = {
+            loading: $('loading-view'), login: $('login-view'), pending: $('pending-view'), app: $('app-view')
+        };
+        function showView(name) {
+            Object.entries(views).forEach(([k, v]) => v.classList.toggle('hidden', k !== name));
+        }
+
+        if (firebaseConfig.apiKey === 'COMPLETAR') {
+            $('loading-text').innerHTML = 'Falta configurar Firebase.<br><span class="text-sm font-normal text-gray-600">Completá <code>firebaseConfig</code> en <code>index.html</code> (ver README).</span>';
+            throw new Error('firebaseConfig sin completar');
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const patientsCollection = collection(db, 'pacientes');
+
+        let allPatients = [];
+        let filteredPatients = [];
+        let patientsUnsubscribe = null;
+        let firstSnapshot = true;
+
+        // ------------------------------------------------------------------
+        // AUTENTICACIÓN + LISTA DE EMAILS AUTORIZADOS
+        // ------------------------------------------------------------------
+        function showPending(user, reason) {
+            const email = escapeHtml(user.email);
+            if (reason === 'verify') {
+                $('pending-title').textContent = 'Verificá tu email';
+                $('pending-message').innerHTML = `<p>Te enviamos un email a <strong>${email}</strong> con un link de verificación.</p><p>Abrilo (revisá también correo no deseado) y después tocá el botón de abajo.</p>`;
+                $('pending-resend').classList.remove('hidden');
+            } else {
+                $('pending-title').textContent = 'Cuenta pendiente de autorización';
+                $('pending-message').innerHTML = `<p>Tu cuenta <strong>${email}</strong> fue creada, pero todavía no está habilitada para ver datos de pacientes.</p><p>Pedile al administrador que la agregue a la lista de usuarios autorizados.</p>`;
+                $('pending-resend').classList.add('hidden');
+            }
+            showView('pending');
+        }
+
+        async function checkAccess(user) {
+            if (!user.emailVerified) return showPending(user, 'verify');
+            try {
+                const snap = await getDoc(doc(db, 'autorizados', user.email.toLowerCase()));
+                if (!snap.exists()) return showPending(user, 'unauthorized');
+            } catch (e) {
+                console.error(e);
+                return showPending(user, 'unauthorized');
+            }
+            $('user-email').textContent = user.email;
+            showView('loading');
+            $('loading-text').textContent = 'Cargando pacientes...';
+            startPatientsListener();
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (patientsUnsubscribe) { patientsUnsubscribe(); patientsUnsubscribe = null; }
+            allPatients = [];
+            if (user) checkAccess(user);
+            else showView('login');
+        });
+
+        $('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, e.target.email.value.trim(), e.target.password.value);
+            } catch (error) { showToast(authError(error), 'error'); }
+        });
+
+        $('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e.target['signup-email'].value.trim(), e.target['signup-password'].value);
+                await sendEmailVerification(cred.user);
+                showToast('Cuenta creada. Revisá tu email para verificarla.', 'success');
+            } catch (error) { showToast(authError(error), 'error'); }
+        });
+
+        $('forgot-password').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = $('email').value.trim();
+            if (!email) return showToast('Escribí tu email arriba y volvé a tocar el link.', 'error');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showToast('Te enviamos un email para restablecer la contraseña.', 'success');
+            } catch (error) { showToast(authError(error), 'error'); }
+        });
+
+        $('show-signup').addEventListener('click', (e) => { e.preventDefault(); $('login-form').classList.add('hidden'); $('signup-form').classList.remove('hidden'); });
+        $('show-login').addEventListener('click', (e) => { e.preventDefault(); $('signup-form').classList.add('hidden'); $('login-form').classList.remove('hidden'); });
+
+        $('pending-retry').addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) return showView('login');
+            await user.reload();
+            await user.getIdToken(true); // refresca email_verified en el token para las reglas
+            checkAccess(auth.currentUser);
+        });
+        $('pending-resend').addEventListener('click', async () => {
+            try {
+                await sendEmailVerification(auth.currentUser);
+                showToast('Email de verificación reenviado.', 'success');
+            } catch (error) { showToast(authError(error), 'error'); }
+        });
+        $('pending-logout').addEventListener('click', () => signOut(auth));
+        $('logout-button').addEventListener('click', () => signOut(auth));
+
+        // ------------------------------------------------------------------
+        // DATOS
+        // ------------------------------------------------------------------
+        const sortKey = (p) => `${p.fecha_nacimiento || ''} ${p.hora_nacimiento || ''}`;
+
+        function startPatientsListener() {
+            firstSnapshot = true;
+            patientsUnsubscribe = onSnapshot(patientsCollection, (snapshot) => {
+                allPatients = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                allPatients.sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+
+                populateYearFilter();
+                if (firstSnapshot) {
+                    firstSnapshot = false;
+                    showView('app');
+                    switchTab(currentTab);
+                } else {
+                    if (currentTab === 'dashboard') updateDashboard();
+                    if (currentTab === 'consultas') refreshTable();
+                }
+            }, (error) => {
+                console.error(error);
+                if (error.code === 'permission-denied') showPending(auth.currentUser, 'unauthorized');
+                else showToast('Error cargando datos', 'error');
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // NAVEGACIÓN
+        // ------------------------------------------------------------------
+        const tabs = { ingreso: $('tab-ingreso'), consultas: $('tab-consultas'), dashboard: $('tab-dashboard') };
+        const tabViews = { ingreso: $('ingreso-view'), consultas: $('consultas-view'), dashboard: $('dashboard-view') };
+        let currentTab = 'ingreso';
+
+        function switchTab(target) {
+            currentTab = target;
+            Object.entries(tabs).forEach(([k, t]) => {
+                t.classList.toggle('active', k === target);
+                t.classList.toggle('inactive', k !== target);
+                tabViews[k].classList.toggle('hidden', k !== target);
+            });
+            if (target === 'consultas') refreshTable();
+            if (target === 'dashboard') updateDashboard();
+        }
+        Object.keys(tabs).forEach(k => tabs[k].addEventListener('click', () => switchTab(k)));
+
+        // ------------------------------------------------------------------
+        // INGRESO
+        // ------------------------------------------------------------------
+        ingresoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return showToast('Tenés que iniciar sesión', 'error');
+
+            const btn = ingresoForm.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Guardando...';
+            try {
+                const data = collectPatientForm(ingresoForm);
+                data.createdAt = serverTimestamp();
+                data.createdBy = user.email;
+                await addDoc(patientsCollection, data);
+                showToast('Paciente guardado correctamente', 'success');
+                resetPatientForm(ingresoForm);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                console.error(err);
+                showToast('Error al guardar', 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Guardar paciente';
+            }
+        });
+
+        // ------------------------------------------------------------------
+        // CONSULTAS
+        // ------------------------------------------------------------------
+        const DEFAULT_ROWS = 10;
+        let filtersApplied = false;
+
+        const numFilter = (id) => { const v = $(id).value.trim(); return v === '' ? null : Number(v); };
+        function inRange(value, min, max) {
+            if (min === null && max === null) return true;
+            if (!hasValue(value)) return false;
+            const v = Number(value);
+            return (min === null || v >= min) && (max === null || v <= max);
+        }
+
+        function applyFilters() {
+            const terms = $('search-nombre').value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+            const f = {
+                fechaDesde: $('search-fecha-desde').value,
+                fechaHasta: $('search-fecha-hasta').value,
+                diagnostico: $('filter-diagnostico').value,
+                evolucion: $('filter-evolucion').value,
+                tipo: $('filter-tipo-nacimiento').value,
+                ant: $('filter-ant-patologicos').value,
+                edad: [numFilter('filter-edad-materna-desde'), numFilter('filter-edad-materna-hasta')],
+                controles: [numFilter('filter-controles-desde'), numFilter('filter-controles-hasta')],
+                peso: [numFilter('filter-peso-desde'), numFilter('filter-peso-hasta')],
+                eg: [numFilter('filter-eg-desde'), numFilter('filter-eg-hasta')],
+                apgar1: [numFilter('filter-apgar1-desde'), numFilter('filter-apgar1-hasta')]
+            };
+
+            return allPatients.filter(p => {
+                if (terms.length) {
+                    const fullName = `${p.apellido || ''} ${p.nombre || ''}`.toLowerCase();
+                    if (!terms.every(t => fullName.includes(t))) return false;
+                }
+                if (f.fechaDesde && (!p.fecha_nacimiento || p.fecha_nacimiento < f.fechaDesde)) return false;
+                if (f.fechaHasta && (!p.fecha_nacimiento || p.fecha_nacimiento > f.fechaHasta)) return false;
+                if (f.diagnostico && !(p.diagnostico || []).includes(f.diagnostico)) return false;
+                if (f.evolucion && p.evolucion !== f.evolucion) return false;
+                if (f.tipo && p.tipo_nacimiento !== f.tipo) return false;
+                if (f.ant && !(p.antPatologicos || []).includes(f.ant)) return false;
+                if (!inRange(p.edad_materna, ...f.edad)) return false;
+                if (!inRange(p.num_controles, ...f.controles)) return false;
+                if (!inRange(p.peso, ...f.peso)) return false;
+                if (!inRange(p.eg, ...f.eg)) return false;
+                if (!inRange(p.apgar1, ...f.apgar1)) return false;
+                return true;
+            });
+        }
+
+        function refreshTable() {
+            if (filtersApplied) {
+                filteredPatients = applyFilters();
+                renderTable(filteredPatients);
+                $('result-count').textContent = `${filteredPatients.length} paciente${filteredPatients.length === 1 ? '' : 's'} encontrado${filteredPatients.length === 1 ? '' : 's'}`;
+                $('export-filtered-button').classList.toggle('hidden', filteredPatients.length === 0);
+            } else {
+                filteredPatients = [];
+                renderTable(allPatients.slice(0, DEFAULT_ROWS));
+                $('result-count').textContent = `Últimos ${Math.min(DEFAULT_ROWS, allPatients.length)} nacimientos · aplique filtros para buscar`;
+                $('export-filtered-button').classList.add('hidden');
+            }
+        }
+
+        $('search-button').addEventListener('click', () => { filtersApplied = true; refreshTable(); });
+        $('consultas-view').querySelector('.filter-panel').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.matches('input')) { filtersApplied = true; refreshTable(); }
+        });
+        $('clear-search-button').addEventListener('click', () => {
+            $('consultas-view').querySelectorAll('.filter-panel input, .filter-panel select').forEach(el => el.value = '');
+            filtersApplied = false;
+            refreshTable();
+        });
+
+        function renderTable(data) {
+            const tbody = $('pacientes-tbody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500 italic">${filtersApplied ? 'No se encontraron resultados con esos filtros.' : 'Todavía no hay pacientes cargados.'}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(p => {
+                const diag = labelList(p.diagnostico) + (p.diagnostico_otros ? ` (${p.diagnostico_otros})` : '');
+                const edit = p.lastModifiedBy
+                    ? `${escapeHtml(p.lastModifiedBy)}<div class="text-xs text-gray-400">${escapeHtml(formatTimestamp(p.updatedAt))}</div>`
+                    : '-';
+                return `
+                    <tr class="hover:bg-sjd-fondo">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${escapeHtml(p.apellido)}, ${escapeHtml(p.nombre)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(p.fecha_nacimiento)} <span class="text-gray-400">${escapeHtml(p.hora_nacimiento || '')}</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${hasValue(p.peso) ? p.peso : '-'} g / ${hasValue(p.eg) ? p.eg : '-'} sem</td>
+                        <td class="px-6 py-4 text-xs text-gray-600 max-w-xs truncate" title="${escapeHtml(diag)}">${escapeHtml(diag) || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${escapeHtml(label(p.evolucion)) || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${escapeHtml(p.createdBy) || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${edit}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <button class="btn-edit" data-edit="${escapeHtml(p.id)}">Editar</button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        $('pacientes-tbody').addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-edit]');
+            if (btn) openEditModal(btn.dataset.edit);
+        });
+
+        // ------------------------------------------------------------------
+        // EDICIÓN
+        // ------------------------------------------------------------------
+        const editModal = $('edit-modal');
+        let currentEditPatientId = null;
+
+        function openEditModal(id) {
+            const p = allPatients.find(x => x.id === id);
+            if (!p) return showToast('Paciente no encontrado', 'error');
+            currentEditPatientId = id;
+            fillPatientForm(editForm, 'edit-', p);
+            const meta = [];
+            if (p.createdBy) meta.push(`Ingresado por ${p.createdBy}${p.createdAt ? ' el ' + formatTimestamp(p.createdAt) : ''}`);
+            if (p.lastModifiedBy) meta.push(`Última edición: ${p.lastModifiedBy} (${formatTimestamp(p.updatedAt)})`);
+            $('edit-meta').textContent = meta.join(' · ');
+            editModal.classList.remove('hidden');
+            editModal.querySelector('.overflow-y-auto').scrollTop = 0;
+        }
+
+        const closeEditModal = () => { editModal.classList.add('hidden'); currentEditPatientId = null; };
+        $('close-edit-modal').addEventListener('click', closeEditModal);
+        $('cancel-edit-button').addEventListener('click', closeEditModal);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !editModal.classList.contains('hidden')) closeEditModal(); });
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentEditPatientId) return;
+            const btn = $('save-edit-button');
+            btn.disabled = true; btn.textContent = 'Guardando...';
+            try {
+                const data = collectPatientForm(editForm);
+                data.updatedAt = serverTimestamp();
+                data.lastModifiedBy = auth.currentUser.email;
+                await updateDoc(doc(db, 'pacientes', currentEditPatientId), data);
+                showToast('Paciente actualizado', 'success');
+                closeEditModal();
+            } catch (err) {
+                console.error(err);
+                showToast('Error al actualizar', 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Guardar cambios';
+            }
+        });
+
+        // ------------------------------------------------------------------
+        // EXPORTACIÓN CSV (Excel en español: separador ";" y UTF-8 con BOM)
+        // ------------------------------------------------------------------
+        const EXPORT_COLUMNS = [
+            ['apellido', 'Apellido'], ['nombre', 'Nombre'], ['fecha_nacimiento', 'Fecha nacimiento'], ['hora_nacimiento', 'Hora nacimiento'],
+            ['edad_materna', 'Edad materna'], ['g', 'G'], ['p', 'P'], ['c', 'C'], ['a', 'A'],
+            ['controlada', 'Controlada'], ['num_controles', 'N° controles'],
+            ['grupo_materno', 'Grupo materno'], ['rh_materno', 'Rh materno'], ['grupo_paciente', 'Grupo paciente'], ['rh_paciente', 'Rh paciente'],
+            ['pcd', 'PCD'], ['pci', 'PCI'], ['antPatologicos', 'Ant. patológicos'],
+            ['tipo_nacimiento', 'Tipo nacimiento'], ['presentacion', 'Presentación'], ['membranas', 'Membranas'],
+            ['liquido_amniotico', 'Líquido amniótico'], ['evolucion', 'Evolución'],
+            ['peso', 'Peso (gr)'], ['talla', 'Talla (cm)'], ['pc', 'PC (cm)'], ['eg', 'EG (sem)'], ['apgar1', 'Apgar 1'], ['apgar5', 'Apgar 5'],
+            ['diagnostico', 'Diagnóstico'], ['diagnostico_otros', 'Otros diagnósticos'], ['notas', 'Notas'],
+            ['createdBy', 'Ingresado por'], ['createdAt', 'Fecha de ingreso'], ['lastModifiedBy', 'Última edición por'], ['updatedAt', 'Fecha última edición']
+        ];
+
+        function csvValue(key, value) {
+            if (value === null || value === undefined) return '';
+            if (Array.isArray(value)) value = labelList(value);
+            else if (typeof value === 'boolean') value = value ? 'Sí' : 'No';
+            else if (value && value.toDate) value = formatTimestamp(value);
+            else if (key === 'fecha_nacimiento') value = formatDate(value);
+            else if (typeof value === 'number') value = String(value).replace('.', ',');
+            else value = label(value);
+            value = String(value);
+            if (/[;"\n\r]/.test(value)) value = `"${value.replace(/"/g, '""')}"`;
+            return value;
+        }
+
+        function exportToCSV(data, filename) {
+            if (data.length === 0) return showToast('No hay datos para exportar', 'error');
+            const lines = [EXPORT_COLUMNS.map(([, h]) => h).join(';')];
+            data.forEach(row => lines.push(EXPORT_COLUMNS.map(([k]) => csvValue(k, row[k])).join(';')));
+            const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('Exportación completada', 'success');
+        }
+
+        const today = () => new Date().toISOString().slice(0, 10);
+        $('export-all-button').addEventListener('click', () => exportToCSV(allPatients, `nacimientos_sjd_todos_${today()}.csv`));
+        $('export-filtered-button').addEventListener('click', () => exportToCSV(filteredPatients, `nacimientos_sjd_filtrados_${today()}.csv`));
+
+        // ------------------------------------------------------------------
+        // DASHBOARD
+        // ------------------------------------------------------------------
+        // Paleta categórica validada (CVD) a partir del azul y celeste institucionales
+        const C = { azul: '#1c5cab', celeste: '#00a7e5', naranja: '#eb6834', gris: '#9ca3af' };
+        const GRID = '#eef0f3';
+        Chart.defaults.font.family = '"Open Sans", system-ui, sans-serif';
+        Chart.defaults.color = '#4b5563';
+        let charts = {};
+
+        const dashYear = $('dash-year');
+        const dashMonth = $('dash-month');
+        dashMonth.value = String(new Date().getMonth());
+        dashYear.addEventListener('change', updateDashboard);
+        dashMonth.addEventListener('change', updateDashboard);
+
+        function populateYearFilter() {
+            const years = new Set([new Date().getFullYear()]);
+            allPatients.forEach(p => { if (p.fecha_nacimiento) years.add(Number(p.fecha_nacimiento.slice(0, 4))); });
+            const sorted = [...years].sort((a, b) => b - a);
+            const current = dashYear.value;
+            dashYear.innerHTML = sorted.map(y => `<option value="${y}">${y}</option>`).join('');
+            dashYear.value = sorted.includes(Number(current)) ? current : String(new Date().getFullYear());
+        }
+
+        const pct = (n, d) => d ? `${((n / d) * 100).toFixed(1).replace('.', ',')}%` : '–';
+
+        function updateDashboard() {
+            const year = Number(dashYear.value);
+            const month = dashMonth.value; // '' = todo el año
+            const data = allPatients.filter(p => {
+                if (!p.fecha_nacimiento) return false;
+                const [y, m] = p.fecha_nacimiento.split('-').map(Number);
+                return y === year && (month === '' || m - 1 === Number(month));
+            });
+
+            // KPIs
+            $('kpi-total').textContent = data.length;
+            const conTipo = data.filter(p => p.tipo_nacimiento);
+            $('kpi-cesareas').textContent = pct(conTipo.filter(p => p.tipo_nacimiento === 'cesarea').length, conTipo.length);
+            $('kpi-cesareas-sub').textContent = `Sobre ${conTipo.length} con tipo registrado`;
+
+            const pesos = data.filter(p => hasValue(p.peso)).map(p => Number(p.peso));
+            $('kpi-peso').textContent = pesos.length ? `${Math.round(pesos.reduce((a, b) => a + b, 0) / pesos.length).toLocaleString('es-AR')} g` : '–';
+            $('kpi-peso-sub').textContent = `Sobre ${pesos.length} con peso registrado`;
+
+            const egs = data.filter(p => hasValue(p.eg)).map(p => Number(p.eg));
+            $('kpi-prematuros').textContent = pct(egs.filter(e => e < 37).length, egs.length);
+            $('kpi-prematuros-sub').textContent = `Sobre ${egs.length} con EG registrada`;
+
+            // Evolución temporal
+            let labels, counts;
+            if (month === '') {
+                labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                counts = new Array(12).fill(0);
+                data.forEach(p => counts[Number(p.fecha_nacimiento.slice(5, 7)) - 1]++);
+                $('chart-time-title').textContent = `Nacimientos por mes (${year})`;
+            } else {
+                const days = new Date(year, Number(month) + 1, 0).getDate();
+                labels = Array.from({ length: days }, (_, i) => String(i + 1));
+                counts = new Array(days).fill(0);
+                data.forEach(p => counts[Number(p.fecha_nacimiento.slice(8, 10)) - 1]++);
+                $('chart-time-title').textContent = `Nacimientos por día (${dashMonth.options[dashMonth.selectedIndex].text} ${year})`;
+            }
+            // Los períodos futuros no se grafican como 0
+            const now = new Date();
+            if (year === now.getFullYear()) {
+                const lastIdx = month === '' ? now.getMonth() : (Number(month) === now.getMonth() ? now.getDate() - 1 : Number(month) < now.getMonth() ? counts.length - 1 : -1);
+                counts = counts.map((c, i) => i <= lastIdx ? c : null);
+            }
+            lineChart('chart-tiempo', labels, counts, 'Nacimientos');
+
+            // Peso al nacer
+            const pesoBins = { '< 1500 g': 0, '1500–2499 g': 0, '2500–4000 g': 0, '> 4000 g': 0 };
+            pesos.forEach(w => {
+                if (w < 1500) pesoBins['< 1500 g']++;
+                else if (w < 2500) pesoBins['1500–2499 g']++;
+                else if (w <= 4000) pesoBins['2500–4000 g']++;
+                else pesoBins['> 4000 g']++;
+            });
+            barChart('chart-peso', Object.keys(pesoBins), Object.values(pesoBins), 'Recién nacidos');
+
+            // Tipo de nacimiento (color fijo por categoría)
+            const tipoCounts = TIPO_NACIMIENTO.map(([v]) => data.filter(p => p.tipo_nacimiento === v).length);
+            const sinTipo = data.length - conTipo.length;
+            pieChart('chart-tipo', 'doughnut',
+                [...TIPO_NACIMIENTO.map(([, l]) => l), ...(sinTipo ? ['Sin dato'] : [])],
+                [...tipoCounts, ...(sinTipo ? [sinTipo] : [])],
+                [C.azul, C.celeste, C.gris]);
+
+            // Top 5 diagnósticos
+            const diagCount = {};
+            data.forEach(p => (p.diagnostico || []).forEach(d => { diagCount[d] = (diagCount[d] || 0) + 1; }));
+            const top = Object.entries(diagCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            barChart('chart-diagnosticos', top.map(([d]) => label(d)), top.map(([, n]) => n), 'Casos', { indexAxis: 'y' });
+
+            // Evolución / destino (color fijo por categoría)
+            const evoCounts = EVOLUCION.map(([v]) => data.filter(p => p.evolucion === v).length);
+            const sinEvo = data.length - evoCounts.reduce((a, b) => a + b, 0);
+            pieChart('chart-evolucion', 'pie',
+                [...EVOLUCION.map(([, l]) => l), ...(sinEvo ? ['Sin dato'] : [])],
+                [...evoCounts, ...(sinEvo ? [sinEvo] : [])],
+                [C.azul, C.celeste, C.naranja, C.gris]);
+
+            // Edad materna
+            const edadBins = { '< 20 (adolescente)': 0, '20–34': 0, '≥ 35 (avanzada)': 0 };
+            data.filter(p => hasValue(p.edad_materna)).forEach(p => {
+                const e = Number(p.edad_materna);
+                if (e < 20) edadBins['< 20 (adolescente)']++;
+                else if (e <= 34) edadBins['20–34']++;
+                else edadBins['≥ 35 (avanzada)']++;
+            });
+            barChart('chart-edad-materna', Object.keys(edadBins), Object.values(edadBins), 'Madres');
+        }
+
+        function makeChart(id, config) {
+            if (charts[id]) charts[id].destroy();
+            charts[id] = new Chart($(id), config);
+        }
+
+        const axisStyle = (showGrid) => ({
+            grid: { display: showGrid, color: GRID, drawTicks: false },
+            border: { display: false },
+            ticks: { precision: 0, padding: 6 }
+        });
+
+        function barChart(id, labels, data, seriesLabel, extra = {}) {
+            const horizontal = extra.indexAxis === 'y';
+            makeChart(id, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: seriesLabel, data, backgroundColor: C.azul, hoverBackgroundColor: '#184f95', borderRadius: 4, borderSkipped: 'start', maxBarThickness: 44 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, indexAxis: extra.indexAxis || 'x',
+                    plugins: { legend: { display: false } },
+                    scales: horizontal
+                        ? { x: { ...axisStyle(true), beginAtZero: true }, y: axisStyle(false) }
+                        : { y: { ...axisStyle(true), beginAtZero: true }, x: axisStyle(false) }
+                }
+            });
+        }
+
+        function lineChart(id, labels, data, seriesLabel) {
+            makeChart(id, {
+                type: 'line',
+                data: { labels, datasets: [{ label: seriesLabel, data, borderColor: C.azul, backgroundColor: 'rgba(28, 92, 171, 0.10)', fill: true, cubicInterpolationMode: 'monotone', borderWidth: 2, pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: C.azul }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: false } },
+                    scales: { y: { ...axisStyle(true), beginAtZero: true }, x: axisStyle(false) }
+                }
+            });
+        }
+
+        function pieChart(id, type, labels, data, colors) {
+            const total = data.reduce((a, b) => a + b, 0);
+            makeChart(id, {
+                type,
+                data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, data.length), borderColor: '#ffffff', borderWidth: 2, hoverOffset: 6 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true, padding: 14,
+                                // Leyenda con valor y porcentaje: la identidad nunca depende solo del color
+                                generateLabels(chart) {
+                                    const base = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+                                    return base.map((l, i) => ({ ...l, text: `${l.text}: ${data[i]} (${pct(data[i], total)})` }));
+                                }
+                            }
+                        },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed} (${pct(ctx.parsed, total)})` } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

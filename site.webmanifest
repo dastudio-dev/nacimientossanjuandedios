@@ -1,0 +1,12 @@
+{
+  "name": "Nacimientos San Juan de Dios",
+  "short_name": "Nacimientos SJD",
+  "icons": [
+    { "src": "web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "web-app-manifest-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "start_url": "./",
+  "theme_color": "#003989",
+  "background_color": "#eff7fe",
+  "display": "standalone"
+}
