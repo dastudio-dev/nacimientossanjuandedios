@@ -388,26 +388,31 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                     <div class="stat-card" style="border-left-color:#003989">
-                        <p class="text-sm text-gray-500 uppercase font-bold">Total nacimientos</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wide">Total nacimientos</p>
                         <p class="text-3xl font-extrabold text-gray-800" id="kpi-total">0</p>
                         <p class="text-xs text-gray-400 mt-1">En el período seleccionado</p>
                     </div>
                     <div class="stat-card" style="border-left-color:#00a7e5">
-                        <p class="text-sm text-gray-500 uppercase font-bold">Tasa de cesáreas</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wide">Tasa de cesáreas</p>
                         <p class="text-3xl font-extrabold text-gray-800" id="kpi-cesareas">0%</p>
                         <p class="text-xs text-gray-400 mt-1" id="kpi-cesareas-sub">Sobre nacimientos con tipo registrado</p>
                     </div>
                     <div class="stat-card" style="border-left-color:#1baf7a">
-                        <p class="text-sm text-gray-500 uppercase font-bold">Peso promedio</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wide">Peso promedio</p>
                         <p class="text-3xl font-extrabold text-gray-800" id="kpi-peso">–</p>
                         <p class="text-xs text-gray-400 mt-1" id="kpi-peso-sub">Sobre nacimientos con peso registrado</p>
                     </div>
                     <div class="stat-card" style="border-left-color:#eb6834">
-                        <p class="text-sm text-gray-500 uppercase font-bold">Prematurez (&lt;37 sem)</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wide">Prematurez (&lt;37 sem)</p>
                         <p class="text-3xl font-extrabold text-gray-800" id="kpi-prematuros">0%</p>
                         <p class="text-xs text-gray-400 mt-1" id="kpi-prematuros-sub">Sobre nacimientos con EG registrada</p>
+                    </div>
+                    <div class="stat-card" style="border-left-color:#4a3aa7">
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wide">Requirieron RCP</p>
+                        <p class="text-3xl font-extrabold text-gray-800" id="kpi-rcp">0%</p>
+                        <p class="text-xs text-gray-400 mt-1" id="kpi-rcp-sub">Sobre el total del período</p>
                     </div>
                 </div>
 
@@ -1191,6 +1196,10 @@
             const egs = data.filter(p => hasValue(p.eg)).map(p => Number(p.eg));
             $('kpi-prematuros').textContent = pct(egs.filter(e => e < 37).length, egs.length);
             $('kpi-prematuros-sub').textContent = `Sobre ${egs.length} con EG registrada`;
+
+            const rcp = data.filter(p => p.requirio_rcp === true).length;
+            $('kpi-rcp').textContent = pct(rcp, data.length);
+            $('kpi-rcp-sub').textContent = `${rcp} de ${data.length} nacimientos`;
 
             // Evolución temporal
             let labels, counts;
