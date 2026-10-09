@@ -738,6 +738,7 @@
             const mm = String(now.getMinutes()).padStart(2, '0');
             form.elements['hora_nacimiento'].value = `${hh}:${mm}`;
             form.timeTouched = false;
+            form.timeHint.classList.remove('hidden');
         }
 
         function resetPatientForm(form) {
@@ -754,8 +755,16 @@
         const editForm = $('edit-form');
         setupPatientForm(ingresoForm, '');
         setupPatientForm(editForm, 'edit-');
+        const timeInput = ingresoForm.elements['hora_nacimiento'];
+        ingresoForm.timeHint = document.createElement('p');
+        ingresoForm.timeHint.className = 'text-xs text-amber-600 mt-1';
+        ingresoForm.timeHint.textContent = '⚠ Hora actual precargada: verificá que coincida con la hora de nacimiento.';
+        timeInput.insertAdjacentElement('afterend', ingresoForm.timeHint);
+        timeInput.addEventListener('input', () => {
+            ingresoForm.timeTouched = true;
+            ingresoForm.timeHint.classList.add('hidden');
+        });
         prefillCurrentTime(ingresoForm);
-        ingresoForm.elements['hora_nacimiento'].addEventListener('input', () => { ingresoForm.timeTouched = true; });
 
         // Opciones de filtros de Consultas
         $('filter-diagnostico').innerHTML = opts(DIAGNOSTICOS, 'Cualquiera');
