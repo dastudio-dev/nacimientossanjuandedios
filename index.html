@@ -731,11 +731,21 @@
             form.updateOtros();
         }
 
+        // Ingreso: la hora de nacimiento arranca con la hora actual (editable)
+        function prefillCurrentTime(form) {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            form.elements['hora_nacimiento'].value = `${hh}:${mm}`;
+            form.timeTouched = false;
+        }
+
         function resetPatientForm(form) {
             form.reset();
             form.querySelectorAll('details').forEach(d => d.open = false);
             form.updateOtros();
             form.updateRcp();
+            if (form === ingresoForm) prefillCurrentTime(form);
         }
 
         $('ingreso-fields').innerHTML = patientFormHTML('');
@@ -744,6 +754,8 @@
         const editForm = $('edit-form');
         setupPatientForm(ingresoForm, '');
         setupPatientForm(editForm, 'edit-');
+        prefillCurrentTime(ingresoForm);
+        ingresoForm.elements['hora_nacimiento'].addEventListener('input', () => { ingresoForm.timeTouched = true; });
 
         // Opciones de filtros de Consultas
         $('filter-diagnostico').innerHTML = opts(DIAGNOSTICOS, 'Cualquiera');
@@ -901,6 +913,8 @@
                 t.classList.toggle('inactive', k !== target);
                 tabViews[k].classList.toggle('hidden', k !== target);
             });
+            // Si la pestaña estuvo abierta un rato, refresca la hora salvo que ya se haya tocado
+            if (target === 'ingreso' && !ingresoForm.timeTouched) prefillCurrentTime(ingresoForm);
             if (target === 'consultas') refreshTable();
             if (target === 'dashboard') updateDashboard();
         }
