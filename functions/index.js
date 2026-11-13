@@ -19,13 +19,10 @@ export const buscarNacimiento = onRequest({ region: 'southamerica-east1', secret
   if (req.method !== 'POST') return void res.status(405).json({ error: 'método' });
   const dado = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
   if (!timingSafeEqual(hash(dado), hash(INTEGRACION_TOKEN.value()))) return void res.status(401).json({ error: 'no autorizado' });
-  const apellido = norm(req.body?.apellido), fn = String(req.body?.fecha_nacimiento || '');
-  if (apellido.length < 2) return void res.status(400).json({ error: 'apellido' });
-  if (fn && !/^\d{4}-\d{2}-\d{2}$/.test(fn)) return void res.status(400).json({ error: 'fecha' });
+  const apellido = norm(req.body?.apellido); // opcional: sin apellido devuelve los nacimientos más recientes
+  if (apellido && apellido.length < 2) return void res.status(400).json({ error: 'apellido' });
   const desde = new Date(Date.now() - DIAS_MAX * 86400000).toISOString().slice(0, 10);
-  let q = getFirestore().collection('pacientes');
-  q = fn ? q.where('fecha_nacimiento', '==', fn) : q.where('fecha_nacimiento', '>=', desde);
-  const snap = await q.get();
+  const snap = await getFirestore().collection('pacientes').where('fecha_nacimiento', '>=', desde).orderBy('fecha_nacimiento', 'desc').limit(300).get();
   const pacientes = snap.docs.filter(d => norm(d.data().apellido).startsWith(apellido))
     .map(d => ({ id: d.id, ...Object.fromEntries(CAMPOS.map(k => [k, d.data()[k] ?? null])) }))
     .sort((a, b) => `${b.fecha_nacimiento} ${b.hora_nacimiento}`.localeCompare(`${a.fecha_nacimiento} ${a.hora_nacimiento}`)).slice(0, 10);
